@@ -13,3 +13,7 @@ airflow.db
 .idea/
 
 venv/
+
+# not ideal but prevent creds from being committed
+/src/creds/fifth-jigsaw-415008-eda0700e6e1a.json
+/src/creds/ChatGPT API Key.txt
