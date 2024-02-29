@@ -5,7 +5,13 @@ A repo to manually trigger chatgpt results using a google-sheet input.
 
 ## Dependencies
 - Python 3.10.3
-- Setup environment variables
+  
+## Configuring credentails
+- Setup google creds:
+  <br> Move the file `fifth-jigsaw-415008-eda0700e6e1a.json` 
+  <br> to the `./src/creds` folder in this repo
+  <br>
+- Setup environment variables:
     - On a Mac/Linux Machine:
         ```bash
         # add this to your bash profile
