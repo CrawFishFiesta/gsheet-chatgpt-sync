@@ -6,6 +6,9 @@ from openai import OpenAI
 import os
 
 def setup_google_client():
+    """
+    Method creates a google-client for interacting with google sheets
+    """
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/spreadsheets',
              'https://www.googleapis.com/auth/drive']
@@ -16,9 +19,17 @@ def setup_google_client():
     client = gspread.authorize(gcp_creds)
     return client
 
+
 def create_questions_from_gsheet(
         spreadsheet: Spreadsheet,
         sheet_tab="cc-test"):
+    """
+    Extract questions from gsheet and format them properly for chat-gpt
+
+    :param spreadsheet: google-sheet name
+    :param sheet_tab: gsheet tab name
+    :return: A list of questions
+    """
 
     records = spreadsheet.worksheet(sheet_tab).get_all_records()
     questions = []
@@ -29,12 +40,43 @@ def create_questions_from_gsheet(
     return questions
 
 
-# def ask_chat_gpt():
-#     client = OpenAI()
+def ask_chat_gpt(question: str) -> str:
+    """
+    Ask chat gpt a question
 
+    :param question: a question to ask chat gpt
+    :return: the chat-gpt answer as a string
+    """
+    client = OpenAI(
+        # check the README.md for instrs on setting the api-key as an env-var
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
+
+    response = client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": question,
+            }
+        ],
+        model="gpt-3.5-turbo",
+    )
+
+    return response.choices[0].message.content
+
+
+def output_to_gsheet(spreadsheet: Spreadsheet, answers: list[str] = None, sheet_tab="cc-test"):
+    sh = spreadsheet.worksheet(sheet_tab)
+    sh.batch_clear(ranges=['C2:C10'])
+
+    for i in range(len(answers)):
+        # worksheet.update_cell(1, 2, 'Bingo!')
+        sh.update_cell(i+2, 3, value = answers[i])
 
 def main():
     client = setup_google_client()
+
+    # parametrize the sheet name
     spreadsheet_name = 'WHAT-WHO-WHY Survey WIP (Responses)'
     try:
         spreadsheet = client.open(spreadsheet_name)
@@ -42,9 +84,15 @@ def main():
         print(f"Spreadsheet '{spreadsheet_name}' not found. Check the name and share settings.")
         return
 
-    questions = create_questions_from_gsheet(spreadsheet)
-    print(questions)
+    fmtd_questions = create_questions_from_gsheet(spreadsheet)
+    answers = []
+    for q in fmtd_questions:
+        answers.append(ask_chat_gpt(q))
 
+    output_to_gsheet(
+        spreadsheet=spreadsheet,
+        answers=answers,
+        sheet_tab="cc-test")
 
 if __name__ == "__main__":
     main()
