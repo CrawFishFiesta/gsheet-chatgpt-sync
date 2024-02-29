@@ -1,15 +1,16 @@
 .git
 .env
 .DS_Store # macOS specific ignore
-airflow_settings.yaml
 __pycache__/
-astro
 .venv
-airflow-webserver.pid
-webserver_config.py
-airflow.cfg
-airflow.db
 
 .idea/
+.DS_Store
+src/.DS_Store
+src/creds/.DS_Store
 
 venv/
+
+# not ideal but prevent creds from being committed
+/src/creds/fifth-jigsaw-415008-eda0700e6e1a.json
+/src/creds/ChatGPT API Key.txt
